@@ -2,11 +2,16 @@
   --taskbar-align: left;
   --icon-size: 100px;
   --icon-spacing: 20px;
+  
+  --white-grey: #D4D0C8;
+  --fake-white: #f4f3f1;
 }
 
 body {
 	margin: 0;
 	font-family: Tahoma;
+	background: black;
+	overflow: hidden;
 }
 
 .wallpaper {
@@ -15,11 +20,25 @@ body {
 	background: #3A6EA5;
 }
 
+.sign {
+	z-index: 1;
+	color: var(--fake-white);
+	font-weight: bold;
+	position: absolute;
+	bottom: 60px;
+	right: 20px;
+	font-size: 40px;
+	user-select: none;
+}
+
 .grid {
-	display: flex;
+	display: inline-flex;
 	flex-direction: column;
 	gap: var(--icon-spacing);
+	flex-wrap: wrap;
+	
 	padding: var(--icon-spacing);
+	height: 75vh;
 }
 
 .icon {
@@ -27,11 +46,14 @@ body {
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
-	border: 2px solid transparent;
 	
+	z-index: 2;
+	user-select: none;
 	width: var(--icon-size);
 	height: calc(var(--icon-size)*(4/5));
+	border: 2px solid transparent;
 	border-radius: 10px;
+	transition: background 0.2s;
 }
 
 .icon img {
@@ -46,13 +68,18 @@ body {
 	top: -20px;
 }
 
-
 .icon:hover {
+	background-color: rgb(255, 255, 255, 0.05);
 	cursor: pointer;
 }
 
+.icon:active {
+	transform: scale(0.98);
+}
+
 .icon[focused] {
-	border: 2px dashed #b1b5c4;
+	border: 2px solid rgb(177, 181, 196, 0.2);
+	background-color: rgb(255, 255, 255, 0.1);
 }
 
 .taskbar {
@@ -66,7 +93,7 @@ body {
 	top: 100%;
 	height: 40px;
 	padding: 0 6px;
-	background: #D4D0C8;
+	background: var(--white-grey);
 }
 
 .taskbar img {
@@ -87,6 +114,11 @@ body {
 	font-weight: bold;
 	border: 3px outset white;
 	height: 25px;
+}
+
+.start-menu:active {
+	border: 3px inset white;
+	transform: scale(0.98);
 }
 
 .task-separator {
@@ -122,8 +154,13 @@ li.task {
 	min-width: 180px;
 }
 
+li.task:active {
+	border: 3px inset white;
+	transform: scale(0.98);
+}
+
 li.task[focused] {
-	background: #f4f3f1;
+	background: var(--fake-white);
 	border: 3px inset white;
 	font-weight: bold;
 }

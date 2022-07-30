@@ -1,0 +1,88 @@
+.window {
+	min-width: 300px;
+	min-height: 30px;
+	position: absolute;
+	resize: both;
+	overflow: hidden;
+	top: 100px;
+	left: 100px;
+	background-color: white;
+	border: 3px outset white;
+	box-shadow: 3px 3px rgb(0, 0, 0, 0.2), 0 0 transparent;
+}
+
+.window-header {
+	display: flex;
+	position:sticky;
+    top:0;
+	height: 30px;
+	padding: 0 5px;
+	z-index: 10;
+	background: linear-gradient(to right, #011b67 0%, #b7d7f9 100%);
+	border-bottom: 3px outset white;
+	color: white;
+	user-select: none;
+}
+
+.window[idle] .window-header {
+	background: linear-gradient(to right, #80807f 0%, #c1c0c0 100%);
+}
+
+.window[maximized] {
+	top: 0px !important;
+	left: 0px !important;
+	width: calc(100% - 6px)!important;
+	height: calc(100% - 47px) !important;
+}
+
+.window-title-container {
+	flex: 1;
+	display: flex;
+	justify-content: left;
+	align-items: center;
+}
+
+.window-title-container img {
+	height: 38px;
+	margin-left: -8px;
+}
+.window-name {
+	color: white;
+	font-size: 15px;
+	font-weight: bold;
+	margin-left: -3px;
+	white-space: nowrap;
+}
+
+.window-btn-container {
+	flex: 1;
+	display: flex;
+	justify-content: right;
+	align-items: center;
+	gap: 3px;
+}
+
+.window-btn {
+	background: var(--white-grey);
+	width: 22px;
+	height: 18px;
+	border: 3px outset white;
+}
+
+.window-btn:hover {
+	cursor: pointer;
+}
+
+.window-btn:active {
+	border: 3px inset white;
+	transform: scale(0.98);
+}
+
+.window-content {
+	height: 100%;
+	overflow: hidden;
+}
+
+iframe {
+	user-select: none;
+}
