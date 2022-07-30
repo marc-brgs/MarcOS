@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: #f0f0f0;">
+	<head>
+		<title>Ice Cream Configurator</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+	</head>
+
+	<body>
+		<div id="info" style="background-color: #f0f0f0; color: black; font-style: italic;">
+			An orignal Three.js project
+		</div>
+		
+		<div id="tooltip" style="background-color: #333; opacity: 0.95; text-align: center; border-radius: 5px; position: absolute; width: auto; height: auto; min-width: 50px; padding: 3px 10px; z-index: 4; display: none; user-select: none;"></div>
+		
+		<div style="position: absolute; top: 0; left: 0; padding: 0px 0px 0px 5px; color: black; width: 200px; height: 300px; z-index: 1; user-select: none;">
+			<br/>
+			<b style="font-size: 15px;">ICE CREAM CONFIGURATOR</b><br/><br/>
+			<b>Configurer</b><br/>
+			<span>Taille cornet :</span>
+			<select id="contenant">
+				<option>M</option>
+				<option>XXL</option>
+			</select>
+			<br/>
+			<span>Boule de glace :</span><br/>
+			<button id="add-boule">+</button>
+			<button id="remove-boule">-</button>
+			
+			<br/>
+			<label for="switch-cerise">Cerise :</label><input id="switch-cerise" type="checkbox" style="position: relative; top: 3px;"></input>
+			<label for="switch-mms">M&M's :</label><input id="switch-mms" type="checkbox" style="position: relative; top: 3px;"></input>
+			
+			<br/><br/>
+			<b>Menu</b><br/>
+			<span>Cornet M (3 boules max)</span><br/>
+			<span>Cornet XXL (5 boules max)</span><br/>
+			<span>Nombre de boules :</span> <span id="nb-boule">1</span>
+			<br/><br/>
+			<b>Info</b><br/>
+			<i>*LEFT / RIGHT click pour changer de parfum*</i>
+		</div>
+		
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "./three.js-dev/build/three.module.js"
+				}
+			}
+		</script>
+		
+		<script type="module">
+			import * as THREE from 'three';
+
+			import { OrbitControls } from './three.js-dev/jsm/controls/OrbitControls.js';
+			import { TrackballControls } from './three.js-dev/jsm/controls/TrackballControls.js';
+			import { GLTFLoader } from './three.js-dev/jsm/loaders/GLTFLoader.js';
+			import { FBXLoader } from './three.js-dev/jsm/loaders/FBXLoader.js'
+			import Stats from './three.js-dev/jsm/libs/stats.module.js';
+			
+			
+			
+			var container, controls, stats;
+			var camera, light, light1, light2, light3, scene, renderer;
+			var clock = new THREE.Clock();
+			
+			var raycaster;
+			var INTERSECTED;
+			
+			const pointer = new THREE.Vector2();
+			
+			var tastes = [
+				{name:"Chocolat", r:0.1137 , g:0.0750 ,b:0.0657},
+				{name:"Vanille", r:0.924 , g:0.945 ,b:0.52},
+				{name:"Café", r:0.579 , g:0.354 ,b:0.172},
+				{name:"Pistache", r:0.309 , g:0.862 ,b:0.209},
+				{name:"Mangue", r:0.867 , g:0.565 ,b:0.122},
+				{name:"Noix de coco", r:0.805 , g:0.899 ,b:0.978},
+				{name:"Fraise", r:0.815 , g:0.124 ,b:0.232},
+				{name:"Citron", r:0.802 , g:0.769 ,b:0.126},
+				{name:"Citron vert", r:0.487 , g:0.976 ,b:0.100}
+				];
+				
+			var nb_boule = 1;
+			
+			var boule1 = new THREE.Object3D();
+			var boule2 = new THREE.Object3D();
+			var boule3 = new THREE.Object3D();
+			var boule4 = new THREE.Object3D();
+			var boule5 = new THREE.Object3D();
+			var cerise = new THREE.Object3D();
+			var mms = new THREE.Object3D();
+			var cone = new THREE.Object3D();
+			var cone_xxl = new THREE.Object3D();
+			
+			init();
+			animate();
+
+			function init() {
+				
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 1000 );
+				camera.position.set( 0.0, 1.0, 4. );
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xf0f0f0 );
+				
+				light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+				scene.add( light );
+				
+				const gm_table = new THREE.BoxGeometry( 3, 0.1, 3 );
+				var mt_bois = new THREE.MeshPhongMaterial( {color: 0x999999} );
+				var table = new THREE.Mesh( gm_table, mt_bois );
+				table.position.set(0.0, -1.0, 0.0);
+				scene.add( table );
+				
+				
+				var loader = new GLTFLoader().setPath( './assets/' );
+					
+				loader.load( 'cone.glb', function ( gltf ) {
+					//gltf.scene.traverse( function ( child ) {} );
+					cone = gltf.scene;
+					cone.name = 'Cornet';
+					cone.scale.set(0.27, 0.27, 0.27);
+					cone.position.set(0, -0.4, 0);
+					scene.add(cone);
+					} );
+					
+				loader.load( 'cone_xxl.glb', function ( gltf ) {
+					//gltf.scene.traverse( function ( child ) {} );
+					cone_xxl = gltf.scene;
+					cone_xxl.name = 'Cornet XXL';
+					cone_xxl.scale.set(0.27, 0.27, 0.27);
+					cone_xxl.position.set(0, -0.4, 0);
+					//scene.add(cone_xxl);
+					} );
+				
+				loader.load( 'cherry.glb', function ( gltf ) {
+					cerise = gltf.scene;
+					cerise.name = "Cerise";
+					cerise.scale.set(0.45, 0.45, 0.45);
+					cerise.position.set(0, 0.38, 0);
+					} );
+				
+				
+				loader.load( 'm&ms.glb', function ( gltf ) {
+					mms = gltf.scene;
+					mms.name = "M&M's";
+					mms.scale.set(0.5, 0.5, 0.5);
+					mms.position.set(0.0, 0.2, 0.0);
+					render();
+					} );
+				
+				loader.load( 'scoop.glb', function ( gltf ) {
+					boule1 = gltf.scene;
+					boule1.name = "Boule 1";
+					boule1.scale.set(0.5, 0.5, 0.5);
+					boule1.position.set(0.0, 0.2, 0.0);
+					let taste = randomTaste();
+					boule1.children[0].material.name = taste.name;
+					boule1.children[0].material.color.r = taste.r;
+					boule1.children[0].material.color.g = taste.g;
+					boule1.children[0].material.color.b = taste.b;
+					scene.add(boule1);
+					} );
+				
+				
+				loader.load( 'scoop.glb', function ( gltf ) {
+					boule2 = gltf.scene;
+					boule2.name = "Boule 2";
+					boule2.scale.set(0.5, 0.5, 0.5);
+					boule2.position.set(0, 1, 0.5);
+					let taste = randomTaste();
+					boule2.children[0].material.name = taste.name;
+					boule2.children[0].material.color.r = taste.r;
+					boule2.children[0].material.color.g = taste.g;
+					boule2.children[0].material.color.b = taste.b;
+					} );
+
+					
+				loader.load( 'scoop.glb', function ( gltf ) {
+					boule3 = gltf.scene;
+					boule3.name = "Boule 3";
+					boule3.scale.set(0.5, 0.5, 0.5);
+					boule3.position.set(0.5, 1, 0.5);
+					let taste = randomTaste();
+					boule3.children[0].material.name = taste.name;
+					boule3.children[0].material.color.r = taste.r;
+					boule3.children[0].material.color.g = taste.g;
+					boule3.children[0].material.color.b = taste.b;
+					} );
+				
+				loader.load( 'scoop.glb', function ( gltf ) {
+					boule4 = gltf.scene;
+					boule4.name = "Boule 4";
+					boule4.scale.set(0.5, 0.5, 0.5);
+					boule4.position.set(0.5, 1, 0.5);
+					let taste = randomTaste();
+					boule4.children[0].material.name = taste.name;
+					boule4.children[0].material.color.r = taste.r;
+					boule4.children[0].material.color.g = taste.g;
+					boule4.children[0].material.color.b = taste.b;
+					} );
+					
+				loader.load( 'scoop.glb', function ( gltf ) {
+					boule5 = gltf.scene;
+					boule5.name = "Boule 5";
+					boule5.scale.set(0.5, 0.5, 0.5);
+					boule5.position.set(0.5, 1, 0.5);
+					let taste = randomTaste();
+					boule5.children[0].material.name = taste.name;
+					boule5.children[0].material.color.r = taste.r;
+					boule5.children[0].material.color.g = taste.g;
+					boule5.children[0].material.color.b = taste.b;
+					} );
+				
+				raycaster = new THREE.Raycaster();
+				
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.toneMapping = THREE.ACESFilmicToneMapping;
+				renderer.toneMappingExposure = 0.8;
+				renderer.outputEncoding = THREE.sRGBEncoding;
+				container.appendChild( renderer.domElement );
+
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.target.set( 0, 0, 0. );
+				controls.maxPolarAngle = Math.PI/2;
+				controls.enablePan = false;
+				//controls.addEventListener('change', render);
+				controls.minDistance = 1;
+				controls.maxDistance = 10;
+				
+				
+				stats = new Stats();
+				stats.domElement.style.cssText = 'position: fixed; top: 0px; right: 0px; cursor: pointer; opacity: 0.9; z-index: 10000;';
+				container.appendChild( stats.dom );
+				
+				window.addEventListener( 'resize', onWindowResize, false );
+				document.addEventListener( 'mousemove', onPointerMove );
+				
+				document.getElementById("contenant").addEventListener("change", function () {
+					var select_contenant = document.getElementById("contenant").value;
+					
+					if(select_contenant == "Coupe") {
+						contenant.geometry = gm_coupe;
+					}
+					else {
+						scene.remove(boule4);
+						scene.remove(boule5);
+						if(nb_boule > 3)
+							nb_boule = 3;
+						document.getElementById("nb-boule").innerHTML = nb_boule;
+					}
+					updateBoulesPosition(select_contenant, boule1, boule2, boule3, boule4, boule5, cerise);
+				} );
+				
+				document.getElementById("add-boule").addEventListener("click", function () {
+					var select_contenant = document.getElementById("contenant").value;
+					if(select_contenant == "M") {
+						if(nb_boule == 3) return;
+					}
+					else { // XXL
+						if(nb_boule == 5) return;
+					}
+					
+					if(nb_boule == 1)
+						scene.add(boule2);
+					if(nb_boule == 2)
+						scene.add(boule3);
+					if(nb_boule == 3)
+						scene.add(boule4);	
+					if(nb_boule == 4)
+						scene.add(boule5);
+						
+					nb_boule++;
+					document.getElementById("nb-boule").innerHTML = nb_boule;
+					updateBoulesPosition(select_contenant, boule1, boule2, boule3, boule4, boule5, cerise);
+				} );
+				
+				document.getElementById("remove-boule").addEventListener("click", function () {
+					var select_contenant = document.getElementById("contenant").value;
+					if(select_contenant == "M") {
+						if(nb_boule == 1) return;
+					}
+					else { // XXL
+						if(nb_boule == 1) return;
+					}
+					
+					if(nb_boule == 2)
+						scene.remove(boule2);
+					if(nb_boule == 3)
+						scene.remove(boule3);
+					if(nb_boule == 4)
+						scene.remove(boule4);	
+					if(nb_boule == 5)
+						scene.remove(boule5);
+						
+					nb_boule--;
+					document.getElementById("nb-boule").innerHTML = nb_boule;
+					updateBoulesPosition(select_contenant, boule1, boule2, boule3, boule4, boule5, cerise);
+				} );
+				
+				document.getElementById("switch-cerise").addEventListener("change", function () {
+					if(this.checked)
+						scene.add(cerise);
+					else {
+						scene.remove(cerise);
+					}
+					
+					var select_contenant = document.getElementById("contenant").value;
+					updateBoulesPosition(select_contenant, boule1, boule2, boule3, boule4, boule5, cerise);
+				} );
+				
+				document.getElementById("switch-mms").addEventListener("change", function () {
+					if(this.checked)
+						scene.add(mms);
+					else {
+						scene.remove(mms);
+					}
+					
+					var select_contenant = document.getElementById("contenant").value;
+					updateBoulesPosition(select_contenant, boule1, boule2, boule3, boule4, boule5, cerise);
+				} );
+				
+				// CLICK on scoop
+				document.getElementsByTagName("CANVAS")[0].addEventListener("mousedown", function() {
+					if(!(event.which === 1 || event.button === 0 || event.which === 3 || event.button == 2)) return; // not left or right click
+					
+					let mouse = new THREE.Vector2();
+					mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+					mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+					raycaster.setFromCamera(mouse, camera);
+					
+					const intersects = raycaster.intersectObjects(getAllObjectsFromScene());
+
+					var isIntersected = false;
+					if(intersects[0] != undefined && intersects[0].object.parent.type === "Group") isIntersected = true;
+
+					if (isIntersected && intersects[0].object.material.name != "Material" && intersects[0].object.material.name != "Material.001") {
+						if(intersects[0].object.parent.parent.type == "Group")
+							document.getElementById("tooltip").innerHTML = intersects[0].object.parent.parent.name; // cerise
+						else {
+							document.getElementById("tooltip").innerHTML = "<b>" + intersects[0].object.parent.name + "</b>"; // boules
+							
+							// Change taste
+							for(let i = 0; i < tastes.length; i++) {
+								if(tastes[i].name == intersects[0].object.material.name) {
+									if (event.which === 1 || event.button === 0) { // left click
+										let index = (i-1)%tastes.length;
+										if(index < 0) index = tastes.length-1;
+										var next_taste = tastes[index];
+									}
+									else if (event.which === 3 || event.button === 2) { // right click
+										var next_taste = tastes[(i+1)%tastes.length];
+									}
+								}
+							}
+							document.getElementById("tooltip").innerHTML += "<br/>< " + next_taste.name + " >";
+							intersects[0].object.material.name = next_taste.name;
+							intersects[0].object.material.color.r = next_taste.r;
+							intersects[0].object.material.color.g = next_taste.g;
+							intersects[0].object.material.color.b = next_taste.b;
+							
+						}
+					}
+					else {
+						document.getElementById("tooltip").style.display = "none";
+					}
+			  
+					
+				});
+				
+				// MOVE over scoop
+				document.getElementsByTagName("CANVAS")[0].addEventListener("mousemove", function() {
+					let mouse = new THREE.Vector2();
+					mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+					mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+					raycaster.setFromCamera(mouse, camera);
+					
+					const intersects = raycaster.intersectObjects(getAllObjectsFromScene());
+
+					var isIntersected = false;
+					if(intersects[0] != undefined && intersects[0].object.parent.type === "Group") isIntersected = true;
+
+					if (isIntersected) {
+						document.getElementById("tooltip").style.display = "inline-block";
+						document.getElementById("tooltip").style.left = event.clientX+50+"px"; 
+						document.getElementById("tooltip").style.top = event.clientY-25+"px";
+						if(intersects[0].object.parent.parent.type == "Group")
+							document.getElementById("tooltip").innerHTML = intersects[0].object.parent.parent.name; // cerise
+						else if(intersects[0].object.material.name == "Material" || intersects[0].object.material.name == "Material.001" || intersects[0].object.material.name == "Green M&M") {
+							document.getElementById("tooltip").innerHTML = "<b>" + intersects[0].object.parent.name + "</b>";
+						}
+						else {
+							document.getElementById("tooltip").innerHTML = "<b>" + intersects[0].object.parent.name + "</b>"; // boules
+							document.getElementById("tooltip").innerHTML += "<br/>< " + intersects[0].object.material.name + " >";
+						}
+					}
+					else {
+						document.getElementById("tooltip").style.display = "none";
+					}
+			  
+					
+				});
+				
+				
+			}
+			
+			function onPointerMove( event ) {
+				pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+			}
+			
+			function getAllObjectsFromScene() {
+				var objects = scene.children;
+				var ob = [];
+				var current;
+				for(let i = 0; i < objects.length; i++) {
+					current = objects[i];
+					while(current.type == "Group") {
+						current = current.children[0];
+					}
+					if(current.type == "Mesh") {
+						ob.push(current);
+					}
+					
+				}
+				return ob;
+			}
+			
+			function randomTaste() {
+				var taste = tastes[Math.floor(Math.random() * tastes.length)];
+				return taste;
+			}
+			
+			function updateBoulesPosition(type_contenant, boule1, boule2, boule3, boule4, boule5, cerise) {
+				console.log("updateBoulesPosition");
+				if(type_contenant == "M") {
+					scene.remove(cone_xxl);
+					scene.add(cone);
+					boule1.position.set(0.0, 0.2, 0.0);
+					boule2.position.set(0.0, 0.5, 0.0);
+					boule3.position.set(0.0, 0.8, 0.0);
+					cerise.position.set(0.0, 0.08+(0.30*nb_boule), 0.0);
+					mms.position.set(0.0, 0.2+(0.30*(nb_boule-1)), 0.0);
+				}
+				else if(type_contenant == "XXL") {
+					scene.remove(cone);
+					scene.add(cone_xxl);
+					boule1.position.set(0.23, 0.2, -0.23);
+					boule2.position.set(-0.23, 0.2, 0.23);
+					boule3.position.set(-0.23, 0.2, -0.23);
+					boule4.position.set(0.23, 0.2, 0.23);
+					boule5.position.set(0.0, 0.5, 0.0);
+					cerise.position.set(-0.03, 0.25, 0.0); // 2, 3, 4
+					mms.position.set(-0.23, 0.2, 0.23); // 2, 3, 4
+					if(nb_boule == 1) {
+						boule1.position.set(0.0, 0.0, 0.0);
+						mms.position.set(0.0, 0.0, 0.0);
+						cerise.position.set(0.0, 0.18, 0.0);
+					}
+					else if(nb_boule == 5) {
+						cerise.position.set(0.0, 0.68, 0.0);
+						mms.position.set(0.0, 0.5, 0.0);
+					}
+				}
+			}
+			
+			function getRandomFloat(min, max, decimals) {
+				const str = (Math.random() * (max - min) + min).toFixed(decimals);
+
+				return parseFloat(str);
+			}
+
+			function animate() {
+				requestAnimationFrame(animate);    
+				scene.rotation.y += 0.1 * Math.PI/180;
+				controls.update();
+				stats.update();
+				render();
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				//controls.handleResize();
+				render();
+
+			}
+			
+			function render() {
+				// find intersections
+				
+				var objects = scene.children;
+				var ob = [];
+				var current;
+				for(let i = 0; i < objects.length; i++) {
+					current = objects[i];
+					while(current.type == "Group") {
+						current = current.children[0];
+					}
+					if(current.type == "Mesh") {
+						ob.push(current);
+					}
+					
+				}
+				
+				raycaster.setFromCamera( pointer, camera );
+				const intersects = raycaster.intersectObjects( [...ob], false );
+				
+				if ( intersects.length > 0 ) {
+					
+					if ( INTERSECTED != intersects[ 0 ].object ) {
+						
+						if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+						
+						INTERSECTED = intersects[ 0 ].object;
+						
+						
+						
+						INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+						INTERSECTED.material.emissive.setHex( 0xff0000 );
+						
+						document.getElementsByTagName("CANVAS")[0].style.cursor = "pointer";
+					}
+
+				} else {
+					if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+					INTERSECTED = null;
+					document.getElementsByTagName("CANVAS")[0].style.cursor = "";
+				}
+
+				renderer.render( scene, camera );
+			}
+
+		</script>
+
+	</body>
+</html>
