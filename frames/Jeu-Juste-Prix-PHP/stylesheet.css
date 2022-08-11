@@ -1,12 +1,12 @@
 head {
-	height: 100%;
+	min-height: 100%;
 	size: 120%;
 	background: #000000;
 	background-repeat: repeat;
 }
 
 body {
-	height: 100%;
+	min-height: 100%;
 	size: 120%;
 	padding: 0;
 	background: #ffffff;
@@ -19,6 +19,7 @@ body {
 #global {
 	width: 1000px;
 	height: auto;
+	min-height: 1200px;
 	text-align: center;
 	margin: auto;
 }
@@ -99,10 +100,7 @@ body {
 #bas {
 	background-color: #050727;
 	margin-top: 75px;
-	height: 70px;
-	width: 100%;
-	position: absolute;
-	bottom: 0;
+	min-height: 70px;
 }
 
 @font-face {

@@ -36,6 +36,8 @@ $window_offset = 50;
 			drawWindow("02", "img/task_manager.png", "Task Manager", "frames/Jeu-Juste-Prix-PHP");
 			drawWindow("03", "img/my_pictures.png", "My Pictures", "frames/Site-Web-Vente-De-Fleurs-HTML-CSS");
 			drawWindow("04", "img/sticpl_cpl.png", "Camera", "https://www.google.com/search?igu=1&q=marcos%20le%20crack");
+			drawWindow("05", "img/my_computer.png", "My Computer", "");
+			drawWindow("06", "img/network_places.png", "My Network Places", "");
 			drawWindow("09", "img/recycle_bin_empty.png", "Recycle Bin", "");
 			?>
 			
@@ -52,6 +54,9 @@ $window_offset = 50;
 						drawTask("02", "img/task_manager.png", "Task Manager");
 						drawTask("03", "img/my_pictures.png", "My Pictures");
 						drawTask("04", "img/sticpl_cpl.png", "Camera");
+						drawTask("05", "img/my_computer.png", "My Computer");
+						drawTask("06", "img/network_places.png", "My Network Pl...");
+						drawTask("09", "img/recycle_bin_empty.png", "Recycle Bin");
 						?>
 					</ul>
 				</div>
@@ -84,7 +89,7 @@ function drawWindow($pid, $img, $name, $frame) {
 					</div>
 				</div>
 				<div class='window-content'>
-					<iframe src='{$frame}' style='width: 100%; height: 100%;'></iframe>
+					<iframe src='{$frame}' style='width: 100%; height: calc(100% - 36px);'></iframe>
 				</div>
 			</div>";
 	$window_offset += 50;
