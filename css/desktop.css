@@ -27,6 +27,7 @@ body {
 	position: absolute;
 	bottom: 60px;
 	right: 20px;
+	font-family: monospace;
 	font-size: 40px;
 	user-select: none;
 }

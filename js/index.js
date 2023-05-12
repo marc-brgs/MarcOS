@@ -9,7 +9,7 @@ function init() {
 	console.log("MarcOS successfully loaded");
 	
 	// First set
-	const windows = document.getElementsByClassName("window");
+	const windows = document.querySelectorAll(".window");
 	for(let wdw of windows) {
 		wdw.style.width = window.innerWidth*(1/2) + "px";
 		wdw.style.height = window.innerHeight*(2/3) + "px";
@@ -21,20 +21,20 @@ function init() {
 	// Correctly handle iframes when dragging or resizing window
 	const body = document.body;
 	body.addEventListener('mousedown', () => {
-		let iframes = document.getElementsByTagName("IFRAME");
+		let iframes = document.querySelectorAll("iframe");
 		for(let iframe of iframes) {
 			iframe.style.pointerEvents = "none";
 		}
 		});
 	body.addEventListener('mouseup', () => {
-		let iframes = document.getElementsByTagName("IFRAME");
+		let iframes = document.querySelectorAll("iframe");
 		for(let iframe of iframes) {
 			iframe.style.pointerEvents = "auto";
 		}
 		});
 		
 	// Iframe awake window (not working)
-	let iframes = document.getElementsByTagName("IFRAME");
+	let iframes = document.querySelectorAll("iframe");
 	for(let iframe of iframes) {
 		// iframe.contentWindow.document.body.addEventListener('mousedown', (event, iframe) => {
 			// awakeWindow(iframe);
@@ -42,17 +42,17 @@ function init() {
 	}
 	
 	// Click on desktop
-	let wallpaper = document.getElementsByClassName("wallpaper")[0];
+	let wallpaper = document.querySelector(".wallpaper");
 	wallpaper.addEventListener('click', event => {clickOnWallpaper(event.target)});
 	
 	// Click on icon
-	const icons = document.getElementsByClassName("icon");
+	const icons = document.querySelectorAll(".icon");
 	for(let icon of icons) {
 		icon.addEventListener('click', event => {clickOnIcon(event.target)});
 	}
 	
 	// Click on task in taskbar
-	let tasks = document.getElementsByClassName("task");
+	let tasks = document.querySelectorAll(".task");
 	for(let task of tasks) {
 		task.addEventListener('click', event => {clickOnTask(event.target)});
 	}
@@ -64,15 +64,15 @@ function init() {
 	}
 	
 	// Window buttons
-	const btnMinimize = document.getElementsByClassName("window-btn minimize");
+	const btnMinimize = document.querySelectorAll(".window-btn.minimize");
 	for(let btn of btnMinimize) {
 		btn.addEventListener('click', event => {windowBtnMinimize(event)});
 	}
-	const btnMaximize = document.getElementsByClassName("window-btn maximize");
+	const btnMaximize = document.querySelectorAll(".window-btn.maximize");
 	for(let btn of btnMaximize) {
 		btn.addEventListener('click', event => {windowBtnMaximize(event)});
 	}
-	const btnClose = document.getElementsByClassName("window-btn close");
+	const btnClose = document.querySelectorAll(".window-btn.close");
 	for(let btn of btnClose) {
 		btn.addEventListener('click', event => {windowBtnClose(event)});
 	}
@@ -81,19 +81,19 @@ function init() {
 
 function deselectAll() {
 	// Icons
-	let icons = document.getElementsByClassName("icon");
+	let icons = document.querySelectorAll(".icon");
 	for(let icon of icons) {
 		icon.removeAttribute("focused");
 	}
 	
 	// Tasks
-	let tasks = document.getElementsByClassName("task");
+	let tasks = document.querySelectorAll(".task");
 	for(let task of tasks) {
 		task.removeAttribute("focused");
 	}
 	
 	// Windows
-	let windows = document.getElementsByClassName("window");
+	let windows = document.querySelectorAll(".window");
 	for(let wdw of windows) {
 		wdw.setAttribute('idle', '');
 	}
@@ -106,12 +106,12 @@ function clickOnWallpaper(target) {
 }
 
 function clickOnTask(task) {
-	while(task.className !== "task") task = task.parentNode; // from child redirect to parent
+	task = task.closest(".task"); // from child redirect to parent
 	
 	const pid = task.getAttribute("pid");
 	let pid_wdw = null;
 	
-	const windows = document.getElementsByClassName("window");
+	let windows = document.querySelectorAll(".window");
 	for(let wdw of windows) {
 		if(wdw.getAttribute("pid") === pid) {
 			pid_wdw = wdw;
@@ -132,13 +132,13 @@ function clickOnTask(task) {
 	// Focus window
 	deselectAll();
 	
-	task.setAttribute("focused", "");
+	task.setAttribute('focused', '');
 	focusWindow(pid_wdw);
 }
 
 function focusWindow(wdw) {
 	// Idle all other windows
-	let windows = document.getElementsByClassName("window");
+	let windows = document.querySelectorAll(".window");
 	for(let w of windows) {
 		w.setAttribute('idle', '');
 		w.style.zIndex = 10;
@@ -148,11 +148,11 @@ function focusWindow(wdw) {
 	
 	// Active task
 	const pid = wdw.getAttribute("pid");
-	let tasks = document.getElementsByClassName("task");
+	let tasks = document.querySelectorAll(".task");
 	for(let task of tasks) {
 		task.removeAttribute("focused");
 		if(task.getAttribute("pid") === pid) {
-			task.setAttribute("focused", "");
+			task.setAttribute('focused', '');
 		}
 	}
 	
@@ -161,7 +161,7 @@ function focusWindow(wdw) {
 }
 
 function clickOnIcon(icon) {
-	while(icon.className !== "icon") icon = icon.parentNode; // from child redirect to parent
+	icon = icon.closest(".icon"); // from child redirect to parent
 	
 	// Double click
 	if(icon.getAttribute("focused") !== null) {
@@ -170,22 +170,22 @@ function clickOnIcon(icon) {
 	}
 	deselectAll();
 	
-	icon.setAttribute("focused", "");
+	icon.setAttribute('focused', '');
 }
 
 function doubleClickOnIcon(icon) {
 	const pid = icon.getAttribute("pid");
 	
-	let tasks = document.getElementsByClassName("task");
+	let tasks = document.querySelectorAll(".task");
 	for(let task of tasks) {
 		if(task.getAttribute("pid") === pid) {
 			task.style.display = null;
-			task.setAttribute("focused", "");
+			task.setAttribute('focused', '');
 			break;
 		}
 	}
 	
-	let windows = document.getElementsByClassName("window");
+	let windows = document.querySelectorAll(".window");
 	for(let wdw of windows) {
 		if(wdw.getAttribute("pid") === pid) {
 			focusWindow(wdw);
@@ -195,15 +195,16 @@ function doubleClickOnIcon(icon) {
 }
 
 function awakeWindow(wdw) {
-	while(wdw.className !== "window") wdw = wdw.parentNode; // from child redirect to parent
+	wdw = wdw.closest(".window"); // from child redirect to parent
+	
 	focusWindow(wdw);
 }
 
 function dragWindow(wdw) {
 	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 	
-	if (wdw.getElementsByClassName("window-header")) {
-		wdw.getElementsByClassName("window-header")[0].onmousedown = dragMouseDown;
+	if (wdw.querySelector(".window-header")) {
+		wdw.querySelector(".window-header").onmousedown = dragMouseDown;
 	} else {
 		wdw.onmousedown = dragMouseDown;
 	}
@@ -262,7 +263,7 @@ function windowBtnMinimize(e) {
 	
 	// Recover window
 	let target = e.target;
-	while(target.className !== "window") target = target.parentNode;
+	target = target.closest(".window");
 	
 	deselectAll();
 	target.style.display = "none";
@@ -274,7 +275,7 @@ function windowBtnMaximize(e) {
 	
 	// Recover window
 	let target = e.target;
-	while(target.className !== "window") target = target.parentNode;
+	target = target.closest(".window");
 	
 	if(target.getAttribute("maximized") !== null)
 		target.removeAttribute("maximized");
@@ -287,7 +288,7 @@ function windowBtnClose(e) {
 	
 	// Recover window
 	let target = e.target;
-	while(target.className !== "window") target = target.parentNode;
+	target = target.closest(".window");
 	
 	const pid = target.getAttribute("pid");
 	
@@ -296,7 +297,7 @@ function windowBtnClose(e) {
 	target.setAttribute('idle', '');
 	target.removeAttribute("maximized");
 	
-	let tasks = document.getElementsByClassName("task");
+	let tasks = document.querySelectorAll(".task");
 	for(let task of tasks) {
 		if(task.getAttribute("pid") === pid) {
 			task.style.display = "none";
