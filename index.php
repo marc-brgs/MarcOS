@@ -36,7 +36,7 @@ $window_offset = 50;
 			drawWindow("02", "img/task_manager.png", "Task Manager", "frames/Jeu-Juste-Prix-PHP");
 			drawWindow("03", "img/my_pictures.png", "My Pictures", "frames/Site-Web-Vente-De-Fleurs-HTML-CSS");
 			drawWindow("04", "img/sticpl_cpl.png", "Camera", "https://www.google.com/search?igu=1&q=marcos%20le%20crack");
-			drawWindow("05", "img/my_computer.png", "My Computer", "");
+			drawWindow("05", "img/my_computer.png", "My Computer", "frames/TO-DO-LIST");
 			drawWindow("06", "img/network_places.png", "My Network Places", "");
 			drawWindow("09", "img/recycle_bin_empty.png", "Recycle Bin", "");
 			?>
