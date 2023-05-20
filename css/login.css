@@ -1,0 +1,54 @@
+.background {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+	width: 100%;
+	background: #3A6EA5;
+}
+
+.window-like {
+	min-width: 300px;
+	min-height: 30px;
+	overflow: hidden;
+	background-color: white;
+	border: 3px outset white;
+	box-shadow: 3px 3px rgb(0, 0, 0, 0.2), 0 0 transparent;
+}
+
+form {
+	font-size: 15px;
+}
+
+table {
+	margin-top: 15px;
+	margin-left: 15px;
+	margin-bottom: 15px;
+}
+
+table td:first-of-type {
+	padding-right: 30px;
+}
+
+input {
+	min-width: 275px;
+	outline: none;
+	border: 2px inset white;
+}
+
+
+button {
+	background-color: #d4d0c8;
+	padding: 2px 5px;
+	min-width: 70px;
+	border: 2px outset white;
+}
+
+button:active {
+	border: 2px inset white;
+}
+
+/* Override */
+.window-header {
+	height: 26px;
+}
